@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://eclipse.org/jetty/configure.dtd">
+<Configure id="environment" class="org.eclipse.jetty.webapp.WebAppContext">
+	<New class="org.eclipse.jetty.plus.jndi.Resource">
+		<Arg />
+		<Arg>jdbc/dataSource</Arg>
+		<Arg>
+			<New id="dataSource" class="org.hsqldb.jdbc.JDBCDataSource">
+				<Set name="url">jdbc:hsqldb:mem:test;sql.syntax_ora=true</Set>
+				<Set name="user">sa</Set>
+				<Set name="password">password</Set>
+			</New>
+		</Arg>
+	</New>
+	<Call class="org.springframework.jdbc.datasource.init.DatabasePopulatorUtils"
+		name="execute">
+		<Arg>
+			<New
+				class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator">
+				<Set name="scripts">
+					<Array type="org.springframework.core.io.Resource">
+						<Item>
+							<New class="org.springframework.core.io.ClassPathResource">
+								<Arg>/ddl.sql</Arg>
+							</New>
+						</Item>
+						<Item>
+							<New class="org.springframework.core.io.ClassPathResource">
+								<Arg>/dml.sql</Arg>
+							</New>
+						</Item>
+					</Array>
+				</Set>
+			</New>
+		</Arg>
+		<Arg>
+			<Ref id="dataSource" />
+		</Arg>
+	</Call>
+</Configure>

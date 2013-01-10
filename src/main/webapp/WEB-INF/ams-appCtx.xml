@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+	<context:annotation-config />
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="java:comp/env/jdbc/dataSource" />
+	</bean>
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mappingResources">
+			<list>
+				<value>test.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernate.dialect.Oracle8iDialect
+			</value>
+		</property>
+	</bean>
+	<bean class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+		id="transactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	<bean id="testDAO" class="com.ericsson.ams.dao.impl.TestDAOImpl" />
+	<bean class="com.ericsson.ams.service.impl.TestServiceImpl" id="testService" />
+	<aop:config>
+		<aop:advisor advice-ref="testServicePointcut"
+			pointcut="execution(* com.ericsson.ams.service.impl.TestServiceImpl.*(..))" />
+	</aop:config>
+
+	<tx:advice id="testServicePointcut">
+		<tx:attributes>
+			<tx:method propagation="REQUIRED" name="findAll" read-only="true"
+				isolation="DEFAULT" />
+		</tx:attributes>
+	</tx:advice>
+</beans>
